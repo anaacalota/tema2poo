@@ -1,0 +1,8 @@
+package entities.tickets.enums;
+
+public enum Action {
+    ASSIGNED,
+    DE_ASSIGNED,
+    STATUS_CHANGED,
+    ADDED_TO_MILESTONE,
+}
