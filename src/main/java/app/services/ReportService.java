@@ -58,31 +58,7 @@ public class ReportService {
                         || ticket.getStatus() == Status.IN_PROGRESS)
                 .toList();
 
-        Map<String, Object> report = new LinkedHashMap<>();
-
-        report.put("totalTickets", tickets.size());
-        report.put("ticketsByType", countByType(tickets));
-        report.put("ticketsByPriority", countByPriority(tickets));
-
-        Map<String, Double> impactByType = new LinkedHashMap<>();
-
-        for (String type : List.of("BUG", "FEATURE_REQUEST", "UI_FEEDBACK")) {
-
-            List<Ticket> filtered = tickets.stream()
-                    .filter(ticket -> ticket.getType().equals(type))
-                    .toList();
-
-            List<Double> scores = filtered.stream()
-                    .map(ticket -> metric.calculateImpactFinal(
-                            metric.computeBaseScore(ticket), ticket))
-                    .toList();
-
-            impactByType.put(type, round(metric.calculateAverageImpact(scores)));
-        }
-
-        report.put("customerImpactByType", impactByType);
-
-        return report;
+        return buildImpactReport(tickets, metric, "customerImpactByType");
     }
 
     /**
@@ -117,9 +93,9 @@ public class ReportService {
                             metric.computeBaseScore(ticket), ticket))
                     .toList();
 
-            double avg = metric.calculateAverageImpact(scores);
+            double average = metric.calculateAverageImpact(scores);
 
-            riskByType.put(type, classifyRisk(avg));
+            riskByType.put(type, classifyRisk(average));
         }
 
         report.put("riskByType", riskByType);
@@ -140,31 +116,7 @@ public class ReportService {
                         || ticket.getStatus() == Status.CLOSED)
                 .toList();
 
-        Map<String, Object> report = new LinkedHashMap<>();
-
-        report.put("totalTickets", tickets.size());
-        report.put("ticketsByType", countByType(tickets));
-        report.put("ticketsByPriority", countByPriority(tickets));
-
-        Map<String, Double> efficiencyByType = new LinkedHashMap<>();
-
-        for (String type : List.of("BUG", "FEATURE_REQUEST", "UI_FEEDBACK")) {
-
-            List<Ticket> filtered = tickets.stream()
-                    .filter(ticket -> ticket.getType().equals(type))
-                    .toList();
-
-            List<Double> scores = filtered.stream()
-                    .map(ticket -> metric.calculateImpactFinal(
-                            metric.computeBaseScore(ticket), ticket))
-                    .toList();
-
-            efficiencyByType.put(type, round(metric.calculateAverageImpact(scores)));
-        }
-
-        report.put("efficiencyByType", efficiencyByType);
-
-        return report;
+        return buildImpactReport(tickets, metric, "efficiencyByType");
     }
 
     /**
@@ -262,18 +214,15 @@ public class ReportService {
         }
 
         report.put("openTicketsByType", countByType(openTickets));
-
         report.put("openTicketsByPriority", countByPriority(openTickets));
-
         Map<String, String> riskByType = new LinkedHashMap<>();
         Map<String, Double> impactByType = new LinkedHashMap<>();
 
         boolean hasSignificantRisk = false;
         boolean allNegligibleRisk = true;
-        boolean allImpactBelow50 = true;
+        boolean allImpactBelowFifty = true;
 
         for (String type : List.of("BUG", "FEATURE_REQUEST", "UI_FEEDBACK")) {
-
             List<Ticket> filtered = openTickets.stream()
                     .filter(ticket -> ticket.getType().equals(type))
                     .toList();
@@ -301,11 +250,11 @@ public class ReportService {
                             impactMetric.computeBaseScore(ticket), ticket))
                     .toList();
 
-            double avgImpact = round(impactMetric.calculateAverageImpact(impactScores));
-            impactByType.put(type, avgImpact);
+            double averageImpact = round(impactMetric.calculateAverageImpact(impactScores));
+            impactByType.put(type, averageImpact);
 
-            if (avgImpact >= IMPACT_THRESHOLD_STABLE) {
-                allImpactBelow50 = false;
+            if (averageImpact >= IMPACT_THRESHOLD_STABLE) {
+                allImpactBelowFifty = false;
             }
         }
 
@@ -314,7 +263,7 @@ public class ReportService {
 
         String stability;
 
-        if (allNegligibleRisk && allImpactBelow50) {
+        if (allNegligibleRisk && allImpactBelowFifty) {
             stability = "STABLE";
         } else if (hasSignificantRisk) {
             stability = "UNSTABLE";
@@ -323,9 +272,7 @@ public class ReportService {
         }
 
         report.put("appStability", stability);
-
         result.set("report", ResultUtils.MAPPER.valueToTree(report));
-
 
         return result;
     }
@@ -352,10 +299,8 @@ public class ReportService {
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (String devName : subordinates) {
-
             User userDeveloper = context.getUser(devName);
             Developer dev = (Developer) userDeveloper;
-
             List<Ticket> closed = context.getAllTickets().stream()
                     .filter(ticket -> ticket.getAssignedTo()
                             != null && ticket.getAssignedTo().equals(devName))
@@ -381,9 +326,9 @@ public class ReportService {
                 continue;
             }
 
-            double avgResolution = 0.0;
+            double averageResolution = 0.0;
             if (closedTickets > 0) {
-                avgResolution = closed.stream()
+                averageResolution = closed.stream()
                         .mapToDouble(ticket -> {
                             LocalDate assigned = ticket.getAssignedAt();
                             LocalDate solved = ticket.getSolvedAt();
@@ -423,26 +368,26 @@ public class ReportService {
                 case MID -> score = Math.max(0,
                         WEIGHT_CLOSED_TICKETS * closedTickets
                                 + WEIGHT_HIGH_PRIORITY_MID * highPriority
-                                - WEIGHT_RESOLUTION_MID * avgResolution
+                                - WEIGHT_RESOLUTION_MID * averageResolution
                 ) + BONUS_MID;
 
                 case SENIOR -> score = Math.max(0,
                         WEIGHT_CLOSED_TICKETS * closedTickets
                                 + WEIGHT_HIGH_PRIORITY_SENIOR * highPriority
-                                - WEIGHT_RESOLUTION_SENIOR * avgResolution
+                                - WEIGHT_RESOLUTION_SENIOR * averageResolution
                 ) + BONUS_SENIOR;
                 default -> {
                 }
             }
 
             // round
-            double avgResRounded = round(avgResolution);
+            double averageResRounded = round(averageResolution);
             double scoreRounded = round(score);
 
             Map<String, Object> entry = new LinkedHashMap<>();
             entry.put("username", devName);
             entry.put("closedTickets", closedTickets);
-            entry.put("averageResolutionTime", avgResRounded);
+            entry.put("averageResolutionTime", averageResRounded);
             entry.put("performanceScore", scoreRounded);
             entry.put("seniority", seniority);
 
@@ -456,21 +401,58 @@ public class ReportService {
     }
 
     private static double getDiversity(final int bug, final int feature, final int ui) {
-        double avgType = (bug + feature + ui) / TICKET_TYPE_COUNT;
+        double averageType = (bug + feature + ui) / TICKET_TYPE_COUNT;
         double std = 0.0;
-        if (avgType != 0) {
-            double variance = (Math.pow(bug - avgType, 2)
-                    + Math.pow(feature - avgType, 2)
-                    + Math.pow(ui - avgType, 2)) / TICKET_TYPE_COUNT;
+        if (averageType != 0) {
+            double variance = (Math.pow(bug - averageType, 2)
+                    + Math.pow(feature - averageType, 2)
+                    + Math.pow(ui - averageType, 2)) / TICKET_TYPE_COUNT;
             std = Math.sqrt(variance);
         }
         double diversity;
-        if (avgType == 0) {
+        if (averageType == 0) {
             diversity = 0;
         } else {
-            diversity = std / avgType;
+            diversity = std / averageType;
         }
         return diversity;
+    }
+
+    /**
+     * It calculates the impact score for each ticket based on the
+     * ticket's base score and its specific attributes
+     *
+     * @param tickets the list of tickets to analyze
+     * @param metric the metric to use for calculation
+     * @param resultKey the key to use for the result map
+     * @return a map containing the ticket statistics and average impact scores
+     */
+    private Map<String, Object> buildImpactReport(final List<Ticket> tickets,
+                                                  final AbstractMetric metric,
+                                                  final String resultKey) {
+        Map<String, Object> report = new LinkedHashMap<>();
+        report.put("totalTickets", tickets.size());
+        report.put("ticketsByType", countByType(tickets));
+        report.put("ticketsByPriority", countByPriority(tickets));
+
+        Map<String, Double> averageByType = new LinkedHashMap<>();
+
+        for (String type : List.of("BUG", "FEATURE_REQUEST", "UI_FEEDBACK")) {
+            List<Ticket> filtered = tickets.stream()
+                    .filter(ticket -> ticket.getType().equals(type))
+                    .toList();
+
+            List<Double> scores = filtered.stream()
+                    .map(ticket -> metric.calculateImpactFinal(
+                            metric.computeBaseScore(ticket), ticket))
+                    .toList();
+
+            averageByType.put(type,
+                    round(metric.calculateAverageImpact(scores)));
+        }
+
+        report.put(resultKey, averageByType);
+        return report;
     }
 
 }

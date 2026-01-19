@@ -45,7 +45,6 @@ public class Developer extends User {
                     && (type.equals("BUG") || type.equals("UI_FEEDBACK")
                     || type.equals("FEATURE_REQUEST"));
             case SENIOR -> true;
-            default -> false;
         };
     }
 
@@ -66,7 +65,6 @@ public class Developer extends User {
             case DESIGN -> requiredArea == ExpertiseArea.DESIGN
                     || requiredArea == ExpertiseArea.FRONTEND;
             case DB -> requiredArea == ExpertiseArea.DB;
-            default -> false;
         };
     }
 
