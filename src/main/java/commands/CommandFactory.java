@@ -14,19 +14,22 @@ public class CommandFactory {
     private final ViewTicketService viewService;
     private final FlowService flowService;
     private final SearchService searchService;
+    private final ReportService reportService;
 
     public CommandFactory(final UserService userService,
                           final TicketService ticketService,
                           final MilestoneService milestoneService,
                           final ViewTicketService viewService,
                           final FlowService flowService,
-                          final SearchService searchService) {
+                          final SearchService searchService,
+                          final ReportService reportService) {
         this.userService = userService;
         this.ticketService = ticketService;
         this.milestoneService = milestoneService;
         this.viewService = viewService;
         this.flowService = flowService;
         this.searchService = searchService;
+        this.reportService = reportService;
     }
 
     /**
@@ -151,6 +154,31 @@ public class CommandFactory {
                     userService,
                     username,
                     timestamp
+            );
+            case "generateCustomerImpactReport" -> new CustomerImpactReportCommand(
+                    username,
+                    timestamp,
+                    reportService
+            );
+            case "generateTicketRiskReport" -> new TicketRiskReportCommand(
+                    username,
+                    timestamp,
+                    reportService
+            );
+            case "generateResolutionEfficiencyReport" -> new ResolutionEfficiencyReportCommand(
+                    username,
+                    timestamp,
+                    reportService
+            );
+            case "appStabilityReport" -> new AppStabilityReportCommand(
+                    username,
+                    timestamp,
+                    reportService
+            );
+            case "generatePerformanceReport" -> new GeneratePerformanceReportCommand(
+                    username,
+                    timestamp,
+                    reportService
             );
             case "startTestingPhase" -> new StartTestingPhaseCommand(
                     username,

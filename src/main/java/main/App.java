@@ -48,9 +48,10 @@ public final class App {
         TicketService ticketService = new TicketService(flowService);
         MilestoneService milestoneService = new MilestoneService(flowService);
         SearchService searchService = new SearchService(ticketService);
+        ReportService reportService = new ReportService();
         ViewTicketService viewTicketService = new ViewTicketService(ticketService);
         CommandFactory factory = new CommandFactory(userService, ticketService,
-                milestoneService, viewTicketService, flowService, searchService);
+                milestoneService, viewTicketService, flowService, searchService, reportService);
         CommandInvoker invoker = new CommandInvoker();
 
         // users
