@@ -13,14 +13,14 @@ public class CreateMilestoneCommand extends BaseCommand {
     private final String dueDate;
     private final JsonNode params;
 
-    public CreateMilestoneCommand(UserService userService,
-                                  MilestoneService milestoneService,
-                                  FlowService flowService,
-                                  String username,
-                                  String timestamp,
-                                  String name,
-                                  String dueDate,
-                                  JsonNode params) {
+    public CreateMilestoneCommand(final UserService userService,
+                                  final MilestoneService milestoneService,
+                                  final FlowService flowService,
+                                  final String username,
+                                  final String timestamp,
+                                  final String name,
+                                  final String dueDate,
+                                  final JsonNode params) {
         super(userService, username, timestamp);
         this.milestoneService = milestoneService;
         this.flowService = flowService;
@@ -29,6 +29,11 @@ public class CreateMilestoneCommand extends BaseCommand {
         this.params = params;
     }
 
+    /**
+     * Creates a new milestone
+     *
+     * @return an error ObjectNode if validation fails, or null on successful creation
+     */
     @Override
     public ObjectNode execute() {
         if (!userExists()) {
@@ -38,8 +43,9 @@ public class CreateMilestoneCommand extends BaseCommand {
 
         if (!hasRole("MANAGER")) {
             return error("createMilestone",
-                    "The user does not have permission to execute this command: " +
-                            "required role MANAGER; user role " + userService.getRole(username) + ".");
+                    "The user does not have permission to execute this command: "
+                            + "required role MANAGER; user role "
+                            + userService.getRole(username) + ".");
         }
 
         if (flowService.isTestingPhase(timestamp)) {

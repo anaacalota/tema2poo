@@ -30,8 +30,8 @@ public class AssignTicketCommand extends BaseCommand {
         }
 
         if (!hasRole("DEVELOPER")) {
-            return error("assignTicket", "The user does not have permission" +
-                    "to execute this command: required role DEVELOPER; user role "
+            return error("assignTicket", "The user does not have permission"
+                    + "to execute this command: required role DEVELOPER; user role "
                     + userService.getRole(username) + ".");
         }
 

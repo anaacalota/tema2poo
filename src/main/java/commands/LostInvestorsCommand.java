@@ -7,14 +7,19 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class LostInvestorsCommand extends BaseCommand {
     private final FlowService flowService;
 
-    public LostInvestorsCommand(UserService userService,
-                                FlowService flowService,
-                                String username,
-                                String timestamp) {
+    public LostInvestorsCommand(final UserService userService,
+                                final FlowService flowService,
+                                final String username,
+                                final String timestamp) {
         super(userService, username, timestamp);
         this.flowService = flowService;
     }
 
+    /**
+     * Lose all investors
+     *
+     * @return null on success, or an error ObjectNode on failure
+     */
     @Override
     public ObjectNode execute() {
         if (!userExists()) {
@@ -24,8 +29,9 @@ public class LostInvestorsCommand extends BaseCommand {
 
         if (!hasRole("MANAGER")) {
             return error("lostInvestors",
-                    "The user does not have permission to execute this command: " +
-                            "required role MANAGER; user role " + userService.getRole(username) + ".");
+                    "The user does not have permission to execute this command: "
+                            + "required role MANAGER; user role "
+                            + userService.getRole(username) + ".");
         }
 
         flowService.loseInvestors();

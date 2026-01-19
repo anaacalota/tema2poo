@@ -1,8 +1,8 @@
 package entities.tickets;
 
+import entities.tickets.enums.Priority;
 import entities.tickets.enums.BusinessValue;
 import entities.tickets.enums.ExpertiseArea;
-import entities.tickets.enums.Priority;
 import lombok.Getter;
 
 public class UiFeedbackTicket extends Ticket {

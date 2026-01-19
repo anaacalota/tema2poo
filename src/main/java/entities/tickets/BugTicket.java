@@ -1,6 +1,10 @@
 package entities.tickets;
 
-import entities.tickets.enums.*;
+import entities.tickets.enums.ExpertiseArea;
+import entities.tickets.enums.Frequency;
+import entities.tickets.enums.Priority;
+import entities.tickets.enums.Severity;
+import entities.tickets.enums.Status;
 import lombok.Getter;
 
 @Getter

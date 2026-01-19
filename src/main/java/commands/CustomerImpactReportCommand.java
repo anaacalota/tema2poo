@@ -11,19 +11,25 @@ public class CustomerImpactReportCommand implements Command {
     private final String timestamp;
     private final ReportService reportService;
 
-    public CustomerImpactReportCommand(String username, String timestamp,
-                                       ReportService reportService) {
+    public CustomerImpactReportCommand(final String username, final String timestamp,
+                                       final ReportService reportService) {
         this.username = username;
         this.timestamp = timestamp;
         this.reportService = reportService;
     }
 
+    /**
+     * Generate a customer impact report
+     *
+     * @return an ObjectNode containing the report
+     */
     @Override
     public ObjectNode execute() {
-        ObjectNode result = ResultUtils.createBaseNode("generateCustomerImpactReport", username, timestamp);
+        ObjectNode result = ResultUtils.createBaseNode(
+                "generateCustomerImpactReport", username, timestamp);
 
         Map<String, Object> report = reportService
-                .generateCustomerImpactReport(username, timestamp);
+                .generateCustomerImpactReport();
 
         result.set("report", ResultUtils.MAPPER.valueToTree(report));
 

@@ -1,10 +1,10 @@
 package entities.users;
 
 import app.AppContext;
+import entities.users.enums.UserRole;
+import entities.users.enums.Seniority;
 import entities.tickets.enums.ExpertiseArea;
 import entities.tickets.enums.Priority;
-import entities.users.enums.Seniority;
-import entities.users.enums.UserRole;
 import lombok.Getter;
 import lombok.Setter;
 

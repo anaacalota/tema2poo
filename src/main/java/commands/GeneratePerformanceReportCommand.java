@@ -12,20 +12,24 @@ public class GeneratePerformanceReportCommand implements Command {
     private final String timestamp;
     private final ReportService reportService;
 
-    public GeneratePerformanceReportCommand(String username, String timestamp,
-                                            ReportService reportService) {
+    public GeneratePerformanceReportCommand(final String username, final String timestamp,
+                                            final ReportService reportService) {
         this.username = username;
         this.timestamp = timestamp;
         this.reportService = reportService;
     }
 
+    /**
+     * Generate a performance report for a given user and timestamp
+     *
+     * @return an ObjectNode containing the report
+     */
     @Override
     public ObjectNode execute() {
-        ObjectNode result = ResultUtils.createBaseNode("generatePerformanceReport", username, timestamp);
-
+        ObjectNode result = ResultUtils.createBaseNode(
+                "generatePerformanceReport", username, timestamp);
         List<Map<String, Object>> report = reportService
                 .generatePerformanceReport(username, timestamp);
-
         result.set("report", ResultUtils.MAPPER.valueToTree(report));
 
         return result;

@@ -8,14 +8,19 @@ public class ViewAssignedTicketsCommand extends BaseCommand {
 
     private final TicketService ticketService;
 
-    public ViewAssignedTicketsCommand(UserService userService,
-                                      TicketService ticketService,
-                                      String username,
-                                      String timestamp) {
+    public ViewAssignedTicketsCommand(final UserService userService,
+                                      final TicketService ticketService,
+                                      final String username,
+                                      final String timestamp) {
         super(userService, username, timestamp);
         this.ticketService = ticketService;
     }
 
+    /**
+     * View all tickets assigned to a developer
+     *
+     * @return an ObjectNode containing the command name, username, and timestamp,
+     */
     @Override
     public ObjectNode execute() {
 

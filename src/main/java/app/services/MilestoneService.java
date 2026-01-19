@@ -3,19 +3,23 @@ package app.services;
 import app.AppContext;
 import app.utils.ResultUtils;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import entities.milestones.Milestone;
 import entities.tickets.HistoryEntry;
 import entities.tickets.Ticket;
 import entities.tickets.enums.Action;
 import entities.tickets.enums.Priority;
 import entities.tickets.enums.Status;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import entities.users.User;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MilestoneService {
     private static final double PERCENT_MULTIPLIER = 100.0;

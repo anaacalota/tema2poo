@@ -1,19 +1,10 @@
 package metrics;
 
 import entities.tickets.Ticket;
-
 import java.util.List;
 
 public abstract class AbstractMetric implements TicketMetric {
     private static final double SCALE_FACTOR = 100.0;
-
-    /**
-     * Returns the maximum score for a ticket based on its type
-     *
-     * @param ticket the ticket to calculate the maximum score for
-     * @return the maximum score
-     */
-    public abstract double getMaxValue(Ticket ticket);
 
     /**
      * Calculates the final impact score for a ticket

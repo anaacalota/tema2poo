@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MetricEngine {
-
     private final Map<String, TicketMetric> metrics = new HashMap<>();
 
     public MetricEngine() {
@@ -13,7 +12,13 @@ public class MetricEngine {
         metrics.put("resolutionEfficiency", new ResolutionEfficiencyMetric());
     }
 
-    public TicketMetric getMetric(String name) {
+    /**
+     * Returns a metric by name
+     *
+     * @param name the name of the metric
+     * @return the metric
+     */
+    public TicketMetric getMetric(final String name) {
         return metrics.get(name);
     }
 }

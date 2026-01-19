@@ -5,15 +5,17 @@ import app.services.FlowService;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class StartTestingPhaseCommand implements Command {
-
-    private final String username;
     private final String timestamp;
 
-    public StartTestingPhaseCommand(String username, String timestamp) {
-        this.username = username;
+    public StartTestingPhaseCommand(final String timestamp) {
         this.timestamp = timestamp;
     }
 
+    /**
+     * Start a new testing phase
+     *
+     * @return null
+     */
     @Override
     public ObjectNode execute() {
         AppContext context = AppContext.getInstance();

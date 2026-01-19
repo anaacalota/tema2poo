@@ -11,20 +11,24 @@ public class ResolutionEfficiencyReportCommand implements Command {
     private final String timestamp;
     private final ReportService reportService;
 
-    public ResolutionEfficiencyReportCommand(String username, String timestamp,
-                                             ReportService reportService) {
+    public ResolutionEfficiencyReportCommand(final String username, final String timestamp,
+                                             final ReportService reportService) {
         this.username = username;
         this.timestamp = timestamp;
         this.reportService = reportService;
     }
 
+    /**
+     * Generate a resolution efficiency report
+     *
+     * @return an ObjectNode containing the report
+     */
     @Override
     public ObjectNode execute() {
-        ObjectNode result = ResultUtils.createBaseNode("generateResolutionEfficiencyReport", username, timestamp);
-
+        ObjectNode result = ResultUtils.createBaseNode(
+                "generateResolutionEfficiencyReport", username, timestamp);
         Map<String, Object> report = reportService
-                .generateResolutionEfficiencyReport(username, timestamp);
-
+                .generateResolutionEfficiencyReport();
         result.set("report", ResultUtils.MAPPER.valueToTree(report));
 
         return result;

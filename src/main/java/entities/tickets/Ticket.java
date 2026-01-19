@@ -45,7 +45,6 @@ public abstract class Ticket extends Subject {
     @Setter
     @Getter
     private String assignedTo;
-
     @Getter
     private final List<Comment> comments = new ArrayList<>();
     private final List<Status> previousStatuses = new ArrayList<>();

@@ -24,7 +24,8 @@ public abstract class BaseCommand implements Command {
      *
      * @param commandName the name of the command that failed
      * @param message the error message
-     * @return an ObjectNode containing the command name, username, and timestamp, as well as the error message
+     * @return an ObjectNode containing the command name, username, and timestamp,
+     * as well as the error message
      */
     protected ObjectNode error(final String commandName, final String message) {
         ObjectNode node = ResultUtils.createBaseNode(commandName, username, timestamp);

@@ -8,14 +8,19 @@ public class ViewTicketHistoryCommand extends BaseCommand {
 
     private final TicketService ticketService;
 
-    public ViewTicketHistoryCommand(UserService userService,
-                                    TicketService ticketService,
-                                    String username,
-                                    String timestamp) {
+    public ViewTicketHistoryCommand(final UserService userService,
+                                    final TicketService ticketService,
+                                    final String username,
+                                    final String timestamp) {
         super(userService, username, timestamp);
         this.ticketService = ticketService;
     }
 
+    /**
+     * View the history of a ticket
+     *
+     * @return an ObjectNode containing the ticket history
+     */
     @Override
     public ObjectNode execute() {
         return ticketService.viewTicketHistory(username, timestamp);

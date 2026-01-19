@@ -1,6 +1,11 @@
 package commands;
 
-import app.services.*;
+import app.services.FlowService;
+import app.services.MilestoneService;
+import app.services.ReportService;
+import app.services.SearchService;
+import app.services.TicketService;
+import app.services.UserService;
 import app.services.view.ViewTicketService;
 import app.utils.ResultUtils;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -38,25 +43,21 @@ public class CommandFactory {
      * @param commandInput the input containing the command name and parameters
      * @return the created command
      */
-    public Command create(CommandInput commandInput) {
+    public Command create(final CommandInput commandInput) {
         String username = commandInput.getUsername();
         String timestamp = commandInput.getTimestamp();
         String commandName = commandInput.getCommand();
         ObjectNode commandNode = ResultUtils.MAPPER.valueToTree(commandInput);
-
         // optional fields
         JsonNode params = null;
         String name = null;
         String dueDate = null;
-
         if (commandInput.getParams() != null) {
             params = commandInput.getParams();
         }
-
         if (commandInput.getName() != null) {
             name = commandInput.getName();
         }
-
         if (commandInput.getDueDate() != null) {
             dueDate = commandInput.getDueDate();
         }
@@ -71,7 +72,6 @@ public class CommandFactory {
             );
             case "viewTickets" -> new ViewTicketsCommand(
                     userService,
-                    ticketService,
                     viewService,
                     username,
                     timestamp
@@ -181,7 +181,6 @@ public class CommandFactory {
                     reportService
             );
             case "startTestingPhase" -> new StartTestingPhaseCommand(
-                    username,
                     timestamp
             );
             case "lostInvestors" -> new LostInvestorsCommand(
