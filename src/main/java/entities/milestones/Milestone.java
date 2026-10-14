@@ -28,6 +28,7 @@ public class Milestone extends Subject {
     @Getter
     private final LocalDate createdAt;
     private boolean wasBlockedBefore = false;
+    private boolean priorityResetAfterUnblock = false;
     @Getter
     private boolean unblockedHandled = false;
     @Getter
@@ -104,6 +105,12 @@ public class Milestone extends Subject {
                 + " was unblocked after due date. All active tickets are now CRITICAL.");
     }
 
+    /** Notifies assigned developers when this milestone is unblocked. */
+    public void notifyUnblockedByTicket(final int ticketId) {
+        notifyObservers("Milestone " + name + " is now unblocked as ticket " + ticketId
+                + " has been CLOSED.");
+    }
+
     /**
      * Indicates whether the milestone was previously in a blocked state
      *
@@ -118,6 +125,14 @@ public class Milestone extends Subject {
      */
     public void markBlocked() {
         wasBlockedBefore = true;
+    }
+
+    public boolean wasPriorityResetAfterUnblock() {
+        return priorityResetAfterUnblock;
+    }
+
+    public void markPriorityResetAfterUnblock() {
+        priorityResetAfterUnblock = true;
     }
 
     /**

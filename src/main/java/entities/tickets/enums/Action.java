@@ -5,4 +5,5 @@ public enum Action {
     DE_ASSIGNED,
     STATUS_CHANGED,
     ADDED_TO_MILESTONE,
+    REMOVED_FROM_DEV
 }

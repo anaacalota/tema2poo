@@ -19,10 +19,13 @@ public class HistoryEntry {
     private final LocalDate timestamp;
     @Setter
     private Status fromStatus;
+    @Getter
     @Setter
     private Status toStatus;
     @Setter
     private String milestoneName;
+    @Setter
+    private String developerName;
 
     public HistoryEntry(final Action action, final String by, final LocalDate timestamp) {
         this.action = action;
@@ -55,6 +58,9 @@ public class HistoryEntry {
 
             case ADDED_TO_MILESTONE:
                 node.put("milestone", milestoneName);
+                break;
+            case REMOVED_FROM_DEV:
+                node.put("from", developerName);
                 break;
             default:
                 break;

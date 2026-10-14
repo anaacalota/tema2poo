@@ -143,7 +143,7 @@ public class MilestoneService {
 
         // sort by dueDate, then name
         milestones.sort(Comparator.comparing(Milestone::getDueDate)
-                                  .thenComparing(Milestone::getName));
+                .thenComparing(Milestone::getName));
 
         // format each milestone
         for (Milestone milestone : milestones) {
@@ -179,14 +179,16 @@ public class MilestoneService {
 
         node.put("isBlocked", context.isMilestoneBlocked(milestone.getName()));
 
-        long overdueBy = milestone.getOverdueBy(now);
-
-        if (!milestone.isActive()) {
-            overdueBy--;
+        LocalDate completionDate = completionDate(milestone);
+        LocalDate referenceDate = completionDate == null ? now : completionDate;
+        long daysUntilDue = Math.max(0, ChronoUnit.DAYS.between(referenceDate,
+                milestone.getDueDate()) + 1);
+        long overdueBy = Math.max(0, ChronoUnit.DAYS.between(milestone.getDueDate(),
+                referenceDate) + 1);
+        if (completionDate == null && !now.isAfter(milestone.getDueDate())) {
+            overdueBy = 0;
         }
-
-        node.put("daysUntilDue", Math.max(0, ChronoUnit.DAYS.between(now,
-                milestone.getDueDate()) + 1));
+        node.put("daysUntilDue", daysUntilDue);
         node.put("overdueBy", overdueBy);
 
         // open / closed tickets
@@ -225,6 +227,26 @@ public class MilestoneService {
      * @param milestone the milestone
      * @return an ArrayNode containing developer names and their assigned tickets
      */
+    private LocalDate completionDate(final Milestone milestone) {
+        if (milestone.isActive()) {
+            return null;
+        }
+        LocalDate latest = null;
+        for (int id : milestone.getTickets()) {
+            Ticket ticket = context.getTicket(id);
+            if (ticket == null) {
+                continue;
+            }
+            for (HistoryEntry entry : ticket.getHistory()) {
+                if (entry.getToStatus() == Status.CLOSED
+                        && (latest == null || entry.getTimestamp().isAfter(latest))) {
+                    latest = entry.getTimestamp();
+                }
+            }
+        }
+        return latest;
+    }
+
     private ArrayNode computeRepartition(final Milestone milestone) {
         ArrayNode array = ResultUtils.MAPPER.createArrayNode();
         Map<String, List<Integer>> map = new HashMap<>();
@@ -315,14 +337,22 @@ public class MilestoneService {
      */
     public void updateMilestonePriorities(final Milestone milestone, final LocalDate now) {
         if (context.isMilestoneBlocked(milestone.getName())) {
+            milestone.markBlocked();
             return;
         }
 
         LocalDate created = milestone.getCreatedAt();
-        long daysPassed = ChronoUnit.DAYS.between(created, now) + 1;
+        long daysPassed = ChronoUnit.DAYS.between(created, now);
 
         // every 3 days, change the priority of tickets in this milestone
         int currentLevel = (int) (daysPassed / PRIORITY_CHANGE_DAYS);
+
+        if (milestone.wasPreviouslyBlocked()
+                && !milestone.wasPriorityResetAfterUnblock()) {
+            milestone.setLastChangeLevel(currentLevel);
+            milestone.markPriorityResetAfterUnblock();
+            return;
+        }
 
         // check if we already changed the priority
         if (currentLevel > milestone.getLastChangeLevel()) {
@@ -337,6 +367,7 @@ public class MilestoneService {
                 for (int step = 0; step < stepsToIncrease; step++) {
                     upgradePriority(ticket);
                 }
+                flowService.reopenIfDeveloperCannotHandle(ticket, now);
             }
             milestone.setLastChangeLevel(currentLevel);
         }
@@ -377,8 +408,9 @@ public class MilestoneService {
         }
         for (int id : milestone.getTickets()) {
             Ticket ticket = context.getTicket(id);
-            if (ticket != null) {
+            if (ticket != null && ticket.getStatus() != Status.CLOSED) {
                 ticket.setBusinessPriority(Priority.CRITICAL);
+                flowService.reopenIfDeveloperCannotHandle(ticket, now);
             }
         }
     }

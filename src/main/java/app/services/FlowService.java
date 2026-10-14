@@ -1,10 +1,14 @@
 package app.services;
 
 import app.AppContext;
+import entities.tickets.HistoryEntry;
+import entities.tickets.enums.Action;
 import entities.milestones.Milestone;
 import entities.tickets.Ticket;
 import entities.tickets.enums.Priority;
 import entities.tickets.enums.Status;
+import entities.users.Developer;
+import entities.users.User;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -76,7 +80,8 @@ public class FlowService {
         for (Milestone milestone : context.getAllMilestones()) {
             LocalDate due = milestone.getDueDate();
 
-            if (due != null && due.minusDays(1).equals(today)
+            if (due != null && !context.isMilestoneBlocked(milestone.getName())
+                    && due.minusDays(1).equals(today)
                     && !milestone.isDueTomorrowHandled()) {
 
                 // send notifications
@@ -86,9 +91,10 @@ public class FlowService {
                 // all active tickets become CRITICAL
                 for (int id : milestone.getTickets()) {
                     Ticket ticket = context.getTicket(id);
-                    if (ticket.getStatus() == Status.OPEN
-                            || ticket.getStatus() == Status.IN_PROGRESS) {
+                    if (ticket != null && (ticket.getStatus() == Status.OPEN
+                            || ticket.getStatus() == Status.IN_PROGRESS)) {
                         ticket.setBusinessPriority(Priority.CRITICAL);
+                        reopenIfDeveloperCannotHandle(ticket, today);
                     }
                 }
             }
@@ -125,12 +131,33 @@ public class FlowService {
                 // mark all active tickets as CRITICAL
                 for (int id : milestone.getTickets()) {
                     Ticket ticket = context.getTicket(id);
-                    if (ticket.getStatus() == Status.OPEN
-                            || ticket.getStatus() == Status.IN_PROGRESS) {
+                    if (ticket != null && (ticket.getStatus() == Status.OPEN
+                            || ticket.getStatus() == Status.IN_PROGRESS)) {
                         ticket.setBusinessPriority(Priority.CRITICAL);
+                        reopenIfDeveloperCannotHandle(ticket, today);
                     }
                 }
             }
         }
     }
+
+    /** Reopens an assigned ticket if a priority increase exceeds its developer's access. */
+    public void reopenIfDeveloperCannotHandle(final Ticket ticket, final LocalDate date) {
+        if (ticket.getAssignedTo() == null || ticket.getStatus() == Status.CLOSED) {
+            return;
+        }
+        User user = context.getUser(ticket.getAssignedTo());
+        if (user instanceof Developer developer
+                && !developer.canHandleTicket(ticket.getType(), ticket.getBusinessPriority())) {
+            String developerName = ticket.getAssignedTo();
+            ticket.setStatus(Status.OPEN);
+            ticket.setAssignedTo(null);
+            ticket.setAssignedAt(null);
+            ticket.removeObserver(user);
+            HistoryEntry entry = new HistoryEntry(Action.REMOVED_FROM_DEV, "system", date);
+            entry.setDeveloperName(developerName);
+            ticket.addHistoryEntry(entry);
+        }
+    }
+
 }
