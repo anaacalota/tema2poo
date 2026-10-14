@@ -316,6 +316,7 @@ public class ReportService {
 
             int closedTickets = closed.size();
             if (closedTickets == 0) {
+                dev.setPerformanceScore(0.0);
                 Map<String, Object> entry = new LinkedHashMap<>();
                 entry.put("username", devName);
                 entry.put("closedTickets", 0);
@@ -383,6 +384,7 @@ public class ReportService {
             // round
             double averageResRounded = round(averageResolution);
             double scoreRounded = round(score);
+            dev.setPerformanceScore(scoreRounded);
 
             Map<String, Object> entry = new LinkedHashMap<>();
             entry.put("username", devName);

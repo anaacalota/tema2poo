@@ -23,6 +23,14 @@ public class ViewTicketHistoryCommand extends BaseCommand {
      */
     @Override
     public ObjectNode execute() {
+        if (!userExists()) {
+            return error("viewTicketHistory", "The user " + username + " does not exist.");
+        }
+        if (!hasRole("DEVELOPER", "MANAGER")) {
+            return error("viewTicketHistory", "The user does not have permission to execute "
+                    + "this command: required role DEVELOPER, MANAGER; user role "
+                    + userService.getRole(username) + ".");
+        }
         return ticketService.viewTicketHistory(username, timestamp);
     }
 }

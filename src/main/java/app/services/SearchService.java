@@ -238,10 +238,17 @@ public class SearchService {
         String text = (ticket.getTitle() + " " + ticket.getDescription()).toLowerCase();
         List<String> matched = new ArrayList<>();
 
-        for (JsonNode node : keywordsNode) {
-            String word = node.asText().toLowerCase();
-            if (text.contains(word)) {
-                matched.add(word);
+        // Split the text into tokens based on non-letter and non-number characters
+        for (String token : text.split("[^\\p{L}\\p{N}]+")) {
+            if (token.isEmpty()) {
+                continue;
+            }
+            for (JsonNode node : keywordsNode) {
+                String keyword = node.asText().toLowerCase();
+                if (token.contains(keyword) && !matched.contains(token)) {
+                    matched.add(token);
+                    break;
+                }
             }
         }
         matched.sort(String::compareTo);
