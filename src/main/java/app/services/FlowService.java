@@ -147,8 +147,8 @@ public class FlowService {
             return;
         }
         User user = context.getUser(ticket.getAssignedTo());
-        if (user instanceof Developer developer
-                && !developer.canHandleTicket(ticket.getType(), ticket.getBusinessPriority())) {
+        if (user != null
+                && !user.canHandleTicket(ticket.getType(), ticket.getBusinessPriority())) {
             String developerName = ticket.getAssignedTo();
             ticket.setStatus(Status.OPEN);
             ticket.setAssignedTo(null);

@@ -51,6 +51,10 @@ public class TicketStatusService {
 
         ticket.setStatus(next);
 
+        if (next == Status.CLOSED) {
+            context.notifyMilestonesUnblockedByTicket(ticketId, date);
+        }
+
         if (next == Status.RESOLVED) {
             ticket.setSolvedAt(date);
         }

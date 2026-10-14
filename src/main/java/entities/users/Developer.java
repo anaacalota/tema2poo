@@ -36,6 +36,7 @@ public class Developer extends User {
      * @param priority the priority of the ticket
      * @return true if the developer can handle the ticket, false otherwise
      */
+    @Override
     public boolean canHandleTicket(final String type, final Priority priority) {
         return switch (this.seniority) {
             case JUNIOR -> (priority == Priority.LOW || priority == Priority.MEDIUM)

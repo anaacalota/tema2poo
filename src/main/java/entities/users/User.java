@@ -1,5 +1,6 @@
 package entities.users;
 
+import entities.tickets.enums.Priority;
 import entities.users.enums.UserRole;
 import lombok.Getter;
 import notifications.Observer;
@@ -16,6 +17,18 @@ public abstract class User implements Observer {
         this.username = username;
         this.email = email;
         this.role = role;
+    }
+
+    /**
+     * Checks whether this user can handle a ticket. Non-developers do not
+     * restrict ticket assignments.
+     *
+     * @param type the ticket type
+     * @param priority the ticket priority
+     * @return true for non-developers; developers provide their own check
+     */
+    public boolean canHandleTicket(final String type, final Priority priority) {
+        return true;
     }
 
     /**

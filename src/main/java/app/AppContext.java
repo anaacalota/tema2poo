@@ -206,6 +206,27 @@ public class AppContext {
         return blocking.isActive();
     }
 
+    /** Notifies dependent milestones when a blocker becomes complete. */
+    public void notifyMilestonesUnblockedByTicket(final int ticketId, final LocalDate date) {
+        String sourceName = ticketToMilestone.get(ticketId);
+        if (sourceName == null) {
+            return;
+        }
+        Milestone source = milestones.get(sourceName);
+        if (source == null || source.isActive()) {
+            return;
+        }
+        for (String dependentName : source.getBlockingFor()) {
+            Milestone dependent = milestones.get(dependentName);
+            if (dependent != null && dependent.wasPreviouslyBlocked()
+                    && !date.isAfter(dependent.getDueDate())
+                    && !isMilestoneBlocked(dependentName)) {
+                dependent.notifyUnblockedByTicket(ticketId);
+                dependent.markUnblockedHandled();
+            }
+        }
+    }
+
     /**
      * Stores a new notification message for a specific user
      *
