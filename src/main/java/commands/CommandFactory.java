@@ -181,6 +181,8 @@ public class CommandFactory {
                     reportService
             );
             case "startTestingPhase" -> new StartTestingPhaseCommand(
+                    userService,
+                    username,
                     timestamp
             );
             case "lostInvestors" -> new LostInvestorsCommand(
